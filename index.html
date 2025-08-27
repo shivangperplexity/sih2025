@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SIH 2025 Problem statements sorted by Shivang</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.2.3/morph/bootwatch.min.css" rel="stylesheet">
+  <style>
+    :root{--accent:#6d28d9;--muted:#6b7280}
+    body{background:linear-gradient(180deg,#0f172a 0%, #071033 60%);color:#eef2ff;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;margin:0;padding:20px}
+    .hero{padding:20px;border-radius:10px;background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));margin-bottom:14px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ec4899);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:white}
+    .title h1{margin:0;font-size:18px}
+    .title p{margin:0;color:var(--muted);font-size:13px}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .controls .control{flex:1;min-width:160px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin-top:14px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.03)}
+    .title-line{font-weight:600;font-size:15px}
+    .org{color:#a5b4fc;font-size:13px}
+    .muted{color:var(--muted);font-size:13px}
+    .meta{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
+    .badge{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:999px;font-size:12px;color:#dbeafe}
+    .actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+    .copy{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:6px 8px;border-radius:8px;color:#c7d2fe;cursor:pointer}
+    .open{background:transparent;border:1px solid rgba(255,255,255,0.08);padding:6px 8px;border-radius:8px;color:#fff;cursor:pointer}
+    .empty{padding:30px;border-radius:10px;border:1px dashed rgba(255,255,255,0.03);text-align:center;margin-top:12px}
+    #filePicker{display:none}
+    .note{font-size:13px;color:var(--muted);margin-top:8px}
+    @media (max-width:640px){ .controls{flex-direction:column} }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="brand">
+      <div class="logo">SIH</div>
+      <div class="title">
+        <h1>SIH 2025 Problem statements <small style="font-weight:400;color:var(--muted)">sorted by Shivang</small></h1>
+        <p class="muted">Beautiful, fast viewer — search, filter, copy plain text (not HTML). This viewer reads the Excel directly.</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <input id="search" class="form-control control" placeholder="Search title / org / theme / PSNumber" />
+      <select id="category" class="form-select control"><option value="">All Categories</option></select>
+      <select id="theme" class="form-select control"><option value="">All Themes</option></select>
+      <div style="display:flex;gap:8px;align-items:center">
+        <label class="btn btn-sm btn-outline-light" id="btnLoad">Load local Excel</label>
+        <a class="btn btn-sm btn-primary" id="btnTryAuto" href="#" title="Try auto load">Auto-load Excel</a>
+      </div>
+    </div>
+    <div class="note">If Auto-load fails when opening via <code>file://</code>, click "Load local Excel" and choose <strong>SIH2025_problem_statements.xlsx</strong>.</div>
+    <input type="file" id="filePicker" accept=".xlsx,.xls" />
+  </div>
+
+  <div id="grid" class="grid"></div>
+  <div id="empty" class="empty" style="display:none">
+    <div style="font-weight:600">No problem statements found.</div>
+    <div class="muted" style="margin-top:8px">Load the Excel file or serve the folder and use Auto-load.</div>
+  </div>
+
+  <!-- modal -->
+  <div id="modal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.6);align-items:center;justify-content:center;z-index:40">
+    <div style="background:#071235;padding:16px;border-radius:10px;width:min(920px,96%);max-height:84vh;overflow:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h3 id="mTitle" style="margin:0"></h3>
+          <div id="mMeta" class="muted"></div>
+        </div>
+        <div><button id="mClose" class="btn btn-sm btn-light">Close</button></div>
+      </div>
+      <div id="mBody" style="margin-top:12px;white-space:pre-wrap;color:#e6eef8"></div>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button id="copyAll" class="btn btn-sm btn-outline-light">Copy All</button>
+        <button id="copyDesc" class="btn btn-sm btn-outline-light">Copy Description</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- xlsx lib -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+  <script>
+    // helper - plain text copy
+    async function copyText(t){ try{ await navigator.clipboard.writeText(t); }catch(e){ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); } }
+
+    const grid = document.getElementById('grid'), emptyDiv = document.getElementById('empty');
+    const search = document.getElementById('search'), category = document.getElementById('category'), theme = document.getElementById('theme');
+    const filePicker = document.getElementById('filePicker'), btnLoad = document.getElementById('btnLoad'), btnTryAuto = document.getElementById('btnTryAuto');
+
+    const modal = document.getElementById('modal'), mTitle = document.getElementById('mTitle'), mMeta = document.getElementById('mMeta'), mBody = document.getElementById('mBody'), mClose = document.getElementById('mClose'), copyAll = document.getElementById('copyAll'), copyDesc = document.getElementById('copyDesc');
+
+    let DATA = [];
+
+    function safe(x){ return (x === null || x === undefined) ? '' : String(x).trim(); }
+
+    function normalizeArray(arr){
+      // The Excel columns likely include the fields we used earlier.
+      return arr.map(r => ({
+        Title: r.Title || r.title || r['Title'] || r['Problem Statement'] || '',
+        Organization: r.Organization || r.organization || r['Organization'] || '',
+        Category: r.Category || r.category || r['Category'] || '',
+        Theme: r.Theme || r.theme || r['Theme'] || '',
+        PSNumber: r.PSNumber || r.psnumber || r['PSNumber'] || r['PS Number'] || '',
+        ProblemStatementID: r.ProblemStatementID || r.id || '',
+        Department: r.Department || r.department || r['Department'] || '',
+        DatasetLink: r.DatasetLink || r.datasetlink || r['DatasetLink'] || '',
+        YoutubeLink: r.YoutubeLink || r.youtubelink || r['YoutubeLink'] || '',
+        ContactInfo: r.ContactInfo || r.contact || r['ContactInfo'] || '',
+        DescriptionHTML: r.DescriptionHTML || r.descriptionHTML || r.Description || r.description || '',
+        Description: (r.Description && typeof r.Description === 'string') ? r.Description : (r.DescriptionHTML ? stripTags(r.DescriptionHTML) : (r.Description || ''))
+      }));
+    }
+
+    function stripTags(s){ return (s||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim(); }
+
+    function refreshFilters(){
+      const cats = [...new Set(DATA.map(d=>safe(d.Category))).values()].filter(Boolean).sort();
+      const ths = [...new Set(DATA.map(d=>safe(d.Theme))).values()].filter(Boolean).sort();
+      category.innerHTML = '<option value=\"\">All Categories</option>';
+      theme.innerHTML = '<option value=\"\">All Themes</option>';
+      cats.forEach(c=> { const o=document.createElement('option'); o.value=c; o.textContent=c; category.appendChild(o); });
+      ths.forEach(t=> { const o=document.createElement('option'); o.value=t; o.textContent=t; theme.appendChild(o); });
+    }
+
+    function render(){
+      grid.innerHTML = '';
+      const q = safe(search.value).toLowerCase();
+      const cat = safe(category.value).toLowerCase();
+      const th = safe(theme.value).toLowerCase();
+
+      const list = DATA.filter(d=>{
+        if(cat && safe(d.Category).toLowerCase() !== cat) return false;
+        if(th && safe(d.Theme).toLowerCase() !== th) return false;
+        const hay = (safe(d.Title) + ' ' + safe(d.Organization) + ' ' + safe(d.PSNumber) + ' ' + safe(d.Theme) + ' ' + safe(d.Description)).toLowerCase();
+        if(q && !hay.includes(q)) return false;
+        return true;
+      });
+
+      if(!list.length){ emptyDiv.style.display='block'; return } else emptyDiv.style.display='none';
+
+      list.forEach(d=>{
+        const card = document.createElement('div'); card.className = 'card';
+        card.innerHTML = `
+          <div class="title-line">${safe(d.Title)}</div>
+          <div class="org muted">${safe(d.Organization)} — ${safe(d.PSNumber)}</div>
+          <div class="meta"><span class="badge">${safe(d.Category)}</span><span class="badge">${safe(d.Theme)}</span></div>
+          <div class="muted" style="margin-top:8px">${safe(d.Description).slice(0,200)}${safe(d.Description).length>200?'...':''}</div>
+          <div class="actions">
+            <button class="copy">Copy Title</button>
+            <button class="copy">Copy Org</button>
+            <button class="copy">Copy PS#</button>
+            <button class="open">Open</button>
+          </div>
+        `;
+        card.querySelectorAll('.copy')[0].onclick = ()=>{ copyText(safe(d.Title)); card.querySelectorAll('.copy')[0].textContent='Copied ✓'; setTimeout(()=>card.querySelectorAll('.copy')[0].textContent='Copy Title',1000); };
+        card.querySelectorAll('.copy')[1].onclick = ()=>{ copyText(safe(d.Organization)); card.querySelectorAll('.copy')[1].textContent='Copied ✓'; setTimeout(()=>card.querySelectorAll('.copy')[1].textContent='Copy Org',1000); };
+        card.querySelectorAll('.copy')[2].onclick = ()=>{ copyText(safe(d.PSNumber || d.ProblemStatementID)); card.querySelectorAll('.copy')[2].textContent='Copied ✓'; setTimeout(()=>card.querySelectorAll('.copy')[2].textContent='Copy PS#',1000); };
+        card.querySelector('.open').onclick = ()=> openModal(d);
+        grid.appendChild(card);
+      });
+    }
+
+    function openModal(d){
+      mTitle.textContent = safe(d.Title);
+      mMeta.textContent = [safe(d.Organization), safe(d.PSNumber), safe(d.Category)].filter(Boolean).join(' • ');
+      mBody.textContent = safe(d.Description);
+      modal.style.display = 'flex';
+      copyAll.onclick = ()=>{ copyText([safe(d.Title), safe(d.Organization), safe(d.Description)].filter(Boolean).join('\n\n')); copyAll.textContent='Copied ✓'; setTimeout(()=>copyAll.textContent='Copy All',1000); };
+      copyDesc.onclick = ()=>{ copyText(safe(d.Description)); copyDesc.textContent='Copied ✓'; setTimeout(()=>copyDesc.textContent='Copy Description',1000); };
+    }
+    mClose.onclick = ()=> modal.style.display = 'none';
+
+    // Try auto-fetch the excel file from same folder first (works if served via http)
+    async function tryAutoLoad(){
+      const filename = 'SIH2025_problem_statements.xlsx';
+      try{
+        const resp = await fetch(filename);
+        if(!resp.ok) throw new Error('Not found');
+        const ab = await resp.arrayBuffer();
+        const wb = XLSX.read(new Uint8Array(ab), {type:'array'});
+        const first = wb.SheetNames[0];
+        const data = XLSX.utils.sheet_to_json(wb.Sheets[first], {defval:''});
+        DATA = normalizeArray(data);
+        refreshFilters();
+        render();
+        return true;
+      }catch(err){
+        console.warn('Auto-load failed:', err);
+        return false;
+      }
+    }
+
+    // File input handler
+    filePicker.addEventListener('change', async (e)=>{
+      const f = e.target.files[0];
+      if(!f) return;
+      const ab = await f.arrayBuffer();
+      const wb = XLSX.read(new Uint8Array(ab), {type:'array'});
+      const first = wb.SheetNames[0];
+      const data = XLSX.utils.sheet_to_json(wb.Sheets[first], {defval:''});
+      DATA = normalizeArray(data);
+      refreshFilters();
+      render();
+    });
+
+    // Buttons
+    btnLoad.onclick = ()=> filePicker.click();
+    btnTryAuto.onclick = async (e)=>{ e.preventDefault(); const ok = await tryAutoLoad(); if(!ok) alert('Auto-load failed (likely because you opened the file as file://). Use "Load local Excel" to pick the Excel file.'); };
+
+    // keyboard: enter in search triggers render
+    search.addEventListener('input', render);
+    category.addEventListener('change', render);
+    theme.addEventListener('change', render);
+
+    // Try auto-load on open (best if served via http)
+    (async ()=>{ const ok = await tryAutoLoad(); if(!ok){ emptyDiv.style.display='block'; } })();
+  </script>
+</body>
+</html>
