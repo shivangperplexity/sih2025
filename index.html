@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>SIH 2025 Problem Statements — Shivang Advanced Viewer</title>
+<title>SIH 2025 Problem Statements — Shivang Pro Viewer</title>
 
 <!-- Bootswatch + icons + TomSelect -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.2.3/morph/bootstrap.min.css" rel="stylesheet">
@@ -16,9 +16,13 @@
   .logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#ec4899);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:white;box-shadow:0 8px 25px rgba(124,58,237,.3)}
   .title h1{margin:0;font-size:22px} .title p{margin:0;color:#94a3b8;font-size:14px}
   .controls{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+  .search-box{position:relative;flex:1}
+  .search-box input{padding-left:34px}
+  .search-box .fa-search{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#94a3b8}
   #grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
-  .card{background:rgba(255,255,255,.05);backdrop-filter:blur(10px);border-radius:14px;padding:16px;border:1px solid rgba(255,255,255,.08);transition:.25s}
-  .card:hover{transform:translateY(-6px);box-shadow:0 12px 28px rgba(0,0,0,.45)}
+  .card{background:rgba(255,255,255,.05);backdrop-filter:blur(10px);border-radius:14px;padding:16px;border:1px solid rgba(255,255,255,.08);transition:.3s;animation:fadeIn .5s ease}
+  .card:hover{transform:translateY(-6px) scale(1.01);box-shadow:0 12px 28px rgba(0,0,0,.45)}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
   .card .title{font-weight:700;font-size:16px}
   .card .org{color:#cbd5e1;font-size:13px;margin-top:6px}
   .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
@@ -27,8 +31,9 @@
   .actions{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
   .btn-sm{font-size:13px;padding:5px 10px;border-radius:8px}
   /* modal */
-  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:1000}
-  .modal-card{background:#1e293b;padding:20px;border-radius:14px;max-width:900px;width:95%;max-height:88vh;overflow:auto;box-shadow:0 20px 40px rgba(0,0,0,.7)}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:1000;animation:fadeIn .3s}
+  .modal-card{background:#1e293b;padding:20px;border-radius:14px;max-width:900px;width:95%;max-height:88vh;overflow:auto;box-shadow:0 20px 40px rgba(0,0,0,.7);animation:scaleIn .3s}
+  @keyframes scaleIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
   .modal-card h3{margin-top:0}
   .section-title{color:#94a3b8;margin-top:12px;font-size:13px}
 </style>
@@ -38,21 +43,22 @@
     <div class="logo">SIH</div>
     <div class="title">
       <h1>SIH 2025 Problem Statements</h1>
-      <p>by Shivang — Advanced Search, Category Filter, Hardware/Software Filter</p>
+      <p>by Shivang — Pro Viewer with Multi-filters</p>
     </div>
   </div>
 
   <div class="controls">
-    <input id="search" class="form-control" placeholder="Search anything...">
-    <select id="category" placeholder="Filter by Category"></select>
-    <select id="techType" placeholder="Filter by Tech Type">
-      <option value="">All Tech Types</option>
+    <div class="search-box">
+      <i class="fa fa-search"></i>
+      <input id="search" class="form-control" placeholder="Search title, org, desc, solution...">
+    </div>
+    <select id="category" multiple placeholder="Filter by Category"></select>
+    <select id="theme" multiple placeholder="Filter by Theme"></select>
+    <select id="techType" placeholder="Tech Type">
+      <option value="">All</option>
       <option value="Hardware">Hardware</option>
       <option value="Software">Software</option>
     </select>
-    <button id="btnReload" class="btn btn-primary"><i class="fa fa-rotate"></i> Reload</button>
-    <input type="file" id="filePicker" accept=".xlsx" hidden>
-    <button class="btn btn-outline-light" id="btnPick"><i class="fa fa-file"></i> Pick Excel</button>
   </div>
 
   <div id="grid"></div>
@@ -63,7 +69,7 @@
     <div class="modal-card">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <h3 id="mTitle"></h3>
-        <button id="mClose" class="btn btn-sm btn-outline-light"><i class="fa fa-times"></i> Close</button>
+        <button id="mClose" class="btn btn-sm btn-outline-light"><i class="fa fa-times"></i></button>
       </div>
       <div class="section-title">Organization / PS</div>
       <div id="mMeta"></div>
@@ -80,6 +86,8 @@
       <div id="mContact"></div>
       <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
         <button id="copyDesc" class="btn btn-sm btn-primary"><i class="fa fa-copy"></i> Copy Description</button>
+        <button id="copySol" class="btn btn-sm btn-secondary"><i class="fa fa-copy"></i> Copy Solution</button>
+        <button id="copyAll" class="btn btn-sm btn-success"><i class="fa fa-copy"></i> Copy All</button>
       </div>
     </div>
   </div>
@@ -91,11 +99,13 @@ const el=id=>document.getElementById(id); let DATA=[],current=null;
 function safe(x){return x||''}
 function render(){
   const q=safe(el('search').value).toLowerCase();
-  const cat=safe(el('category').value).toLowerCase();
+  const cats=[...el('category').selectedOptions].map(o=>o.value.toLowerCase());
+  const themes=[...el('theme').selectedOptions].map(o=>o.value.toLowerCase());
   const tech=safe(el('techType').value).toLowerCase();
   const grid=el('grid'); grid.innerHTML='';
   const filtered=DATA.filter(d=>{
-    if(cat && safe(d.Category).toLowerCase()!==cat) return false;
+    if(cats.length && !cats.includes(safe(d.Category).toLowerCase())) return false;
+    if(themes.length && !themes.includes(safe(d.Theme).toLowerCase())) return false;
     if(tech){
       const hay=(d.Title+' '+d.Description+' '+d.Category).toLowerCase();
       const hw=['hardware','device','sensor','pcb','circuit','robot','iot'];
@@ -135,21 +145,20 @@ function openModal(d){
 }
 el('mClose').onclick=()=>el('modal').style.display='none';
 el('copyDesc').onclick=()=>navigator.clipboard.writeText(current?.Description||'');
+el('copySol').onclick=()=>navigator.clipboard.writeText(current?.ExpectedSolution||'');
+el('copyAll').onclick=()=>navigator.clipboard.writeText(JSON.stringify(current,null,2));
 async function loadExcel(ab){
   const wb=XLSX.read(new Uint8Array(ab),{type:'array'});
   const sheet=wb.SheetNames[0]; const raw=XLSX.utils.sheet_to_json(wb.Sheets[sheet],{defval:''});
   DATA=raw.map(r=>({Title:r.Title,Organization:r.Organization,Category:r.Category,Theme:r.Theme,PSNumber:r.PSNumber,ProblemStatementID:r.ProblemStatementID,Department:r.Department,DatasetLink:r.DatasetLink,YoutubeLink:r.YoutubeLink,ContactInfo:r.ContactInfo,Description:r.Description,ExpectedSolution:r.ExpectedSolution}));
   render();
-  // update categories
   const categories=[...new Set(DATA.map(r=>safe(r.Category)).filter(Boolean))].sort();
-  const catSel=el('category'); catSel.innerHTML='<option value="">All Categories</option>';
-  categories.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;catSel.appendChild(o);});
-  new TomSelect("#category",{persist:false,create:false,sortField:{field:"text"}});
+  const themes=[...new Set(DATA.map(r=>safe(r.Theme)).filter(Boolean))].sort();
+  new TomSelect("#category",{options:categories.map(c=>({value:c,text:c})),plugins:['remove_button'],maxOptions:1000});
+  new TomSelect("#theme",{options:themes.map(c=>({value:c,text:c})),plugins:['remove_button'],maxOptions:1000});
   new TomSelect("#techType",{persist:false,create:false});
 }
 async function autoLoad(){try{const r=await fetch('SIH2025_problem_statements.xlsx');const ab=await r.arrayBuffer();await loadExcel(ab);}catch(e){console.warn("auto load fail",e)}}
-el('btnReload').onclick=autoLoad;el('btnPick').onclick=()=>el('filePicker').click();
-el('filePicker').onchange=async e=>{const f=e.target.files[0];if(f)await loadExcel(await f.arrayBuffer());};
 el('search').oninput=render;el('techType').onchange=render;
 autoLoad();
 </script>
