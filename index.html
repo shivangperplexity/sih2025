@@ -1,95 +1,318 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SIH 2025 Problem statements sorted by Shivang</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.2.3/morph/bootwatch.min.css" rel="stylesheet">
-  <style>
-    body{background:linear-gradient(180deg,#0f172a,#1e1b4b);color:#f8fafc;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;margin:0;padding:20px}
-    h2{margin-bottom:20px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
-    .card{background:#1e293b;border-radius:12px;padding:14px;box-shadow:0 2px 10px rgba(0,0,0,0.4);transition:transform .2s}
-    .card:hover{transform:translateY(-4px);box-shadow:0 4px 18px rgba(0,0,0,0.5)}
-    .muted{color:#94a3b8;font-size:13px}
-    .badge{background:#334155;color:#e2e8f0;border-radius:999px;padding:2px 8px;font-size:12px;margin-right:6px}
-    .btn{cursor:pointer}
-    #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);align-items:center;justify-content:center;z-index:40}
-    #modal .inner{background:#1e293b;padding:20px;border-radius:12px;width:min(900px,96%);max-height:85vh;overflow:auto;box-shadow:0 6px 20px rgba(0,0,0,0.6)}
-    #modal h3{margin-top:0}
-    .section{margin-top:12px}
-    .section b{color:#cbd5e1}
-    a{color:#60a5fa;text-decoration:none}
-    a:hover{text-decoration:underline}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SIH 2025 Problem statements — Shivang (Improved Viewer)</title>
+
+<!-- Bootswatch + icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.2.3/morph/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+  :root{
+    --bg0:#071033; --bg1:#0f172a; --card:#0f172a; --accent:#7c3aed; --muted:#94a3b8;
+    --glass: rgba(255,255,255,0.03);
+  }
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg0),var(--bg1));color:#eef2ff;font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+  .wrap{max-width:1200px;margin:28px auto;padding:18px}
+  .header{display:flex;align-items:center;gap:14px}
+  .logo{width:62px;height:62px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#ec4899);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:white;box-shadow:0 10px 30px rgba(124,58,237,0.18)}
+  .title h1{margin:0;font-size:20px} .title p{margin:0;color:var(--muted);font-size:13px}
+  .controls{display:flex;gap:12px;align-items:center;margin-top:16px;flex-wrap:wrap}
+  .control{min-width:160px;flex:1}
+  .chip{background:var(--glass);padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);color:#e6eef8}
+  .btn-primary{background:linear-gradient(90deg,var(--accent),#ec4899);border:none;box-shadow:0 8px 20px rgba(124,58,237,0.12)}
+  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#e6eef8}
+
+  /* grid */
+  #grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-top:18px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.03);transition:transform .22s cubic-bezier(.2,.9,.3,1),box-shadow .22s;cursor:default}
+  .card:hover{transform:translateY(-8px);box-shadow:0 30px 60px rgba(2,6,23,0.6)}
+  .card .title{font-weight:700;font-size:15px}
+  .card .org{color:#c7d2fe;font-size:13px;margin-top:6px}
+  .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+  .badge{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.02);font-size:12px;border:1px solid rgba(255,255,255,0.03)}
+  .summary{color:var(--muted);margin-top:8px;line-height:1.4}
+
+  .card .actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .copy-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:6px 10px;border-radius:8px;color:#e6eef8;cursor:pointer}
+  .open-btn{background:transparent;border:1px solid rgba(255,255,255,0.08);padding:6px 10px;border-radius:8px;color:#fff}
+
+  /* modal */
+  .modal-bg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:linear-gradient(rgba(2,6,23,0.6),rgba(2,6,23,0.6));z-index:999}
+  .modal-card{width:min(980px,96%);max-height:86vh;overflow:auto;border-radius:12px;background:linear-gradient(180deg,#02122b,#071235);padding:18px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 30px 60px rgba(0,0,0,0.6)}
+  .modal-card h3{margin:0}
+  .modal-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+  .modal-col{flex:1;min-width:200px}
+  .link{color:#7dd3fc}
+  .section-title{font-size:13px;color:var(--muted);margin-top:12px;margin-bottom:6px}
+
+  /* nice small animations */
+  .fade-in{animation:fadeIn .35s ease both}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* responsive */
+  @media (max-width:680px){ .controls{flex-direction:column} .modal-row{flex-direction:column} }
+
+  /* little helper */
+  .small-muted{color:var(--muted);font-size:13px}
+</style>
 </head>
 <body>
-  <h2>SIH 2025 Problem statements <small style="font-weight:400;color:#94a3b8">by Shivang</small></h2>
-  <div style="margin-bottom:10px">
-    <input id="search" class="form-control" placeholder="Search title/org/theme/solution..." />
-  </div>
-  <div id="grid" class="grid"></div>
-  <div id="modal"><div class="inner">
-    <h3 id="mTitle"></h3>
-    <div id="mMeta" class="muted"></div>
-    <div class="section"><b>Description:</b><br><span id="mDesc"></span></div>
-    <div class="section"><b>Expected Solution:</b><br><span id="mSol"></span></div>
-    <div class="section"><b>Department:</b> <span id="mDept"></span></div>
-    <div class="section"><b>Dataset:</b> <a id="mDataset" href="#" target="_blank"></a></div>
-    <div class="section"><b>YouTube:</b> <a id="mYoutube" href="#" target="_blank"></a></div>
-    <div class="section"><b>Contact:</b> <span id="mContact"></span></div>
-    <div style="margin-top:16px"><button id="mClose" class="btn btn-light">Close</button></div>
-  </div></div>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <script>
-    const grid=document.getElementById('grid'),search=document.getElementById('search');
-    const modal=document.getElementById('modal'),mTitle=document.getElementById('mTitle'),mMeta=document.getElementById('mMeta'),
-          mDesc=document.getElementById('mDesc'),mSol=document.getElementById('mSol'),mDept=document.getElementById('mDept'),
-          mDataset=document.getElementById('mDataset'),mYoutube=document.getElementById('mYoutube'),mContact=document.getElementById('mContact'),
-          mClose=document.getElementById('mClose');
-    let DATA=[];
-    function safe(x){return x||''}
-    function render(){
-      grid.innerHTML='';
-      const q=safe(search.value).toLowerCase();
-      DATA.filter(d=>{
-        return !q || Object.values(d).join(' ').toLowerCase().includes(q);
-      }).forEach(d=>{
-        const div=document.createElement('div');div.className='card';
-        div.innerHTML=`<b>${safe(d.Title)}</b><div class="muted">${safe(d.Organization)} • ${safe(d.PSNumber)}</div>
-          <div><span class="badge">${safe(d.Category)}</span><span class="badge">${safe(d.Theme)}</span></div>
-          <div class="muted">${safe(d.Description).slice(0,150)}...</div>
-          <button class="btn btn-sm btn-outline-light" style="margin-top:6px">Open</button>`;
-        div.querySelector('button').onclick=()=>openModal(d);
-        grid.appendChild(div);
-      });
-    }
-    function openModal(d){
-      mTitle.textContent=safe(d.Title);
-      mMeta.textContent=[safe(d.Organization),safe(d.PSNumber),safe(d.ProblemStatementID)].filter(Boolean).join(' • ');
-      mDesc.textContent=safe(d.Description);
-      mSol.textContent=safe(d.ExpectedSolution);
-      mDept.textContent=safe(d.Department||safe(d.Organization));
-      mDataset.textContent=safe(d.DatasetLink); mDataset.href=safe(d.DatasetLink);
-      mYoutube.textContent=safe(d.YoutubeLink); mYoutube.href=safe(d.YoutubeLink);
-      mContact.textContent=safe(d.ContactInfo);
-      modal.style.display='flex';
-    }
-    mClose.onclick=()=>modal.style.display='none';
-    search.oninput=render;
+  <div class="wrap fade-in">
+    <div class="header">
+      <div class="logo">SIH</div>
+      <div class="title">
+        <h1>SIH 2025 Problem statements <small style="font-weight:400;color:var(--muted)">sorted by Shivang</small></h1>
+        <p>Beautiful, fast viewer — search, select category, filter tech type (Hardware / Software). Copy plain text (description included).</p>
+      </div>
+    </div>
 
-    // AUTO-LOAD excel in same directory
-    async function autoLoad(){
-      try{
-        const resp=await fetch('SIH2025_problem_statements.xlsx');
-        const ab=await resp.arrayBuffer();
-        const wb=XLSX.read(new Uint8Array(ab),{type:'array'});
-        const sheet=wb.SheetNames[0]; 
-        DATA=XLSX.utils.sheet_to_json(wb.Sheets[sheet],{defval:''});
-        render();
-      }catch(e){console.error('Excel auto-load failed',e);}
+    <div class="controls">
+      <input id="search" class="form-control control" placeholder="Search title / org / theme / PSNumber / description..." />
+      <select id="category" class="form-select control"><option value="">All Categories</option></select>
+      <select id="techType" class="form-select control">
+        <option value="">All Tech Types</option>
+        <option value="Hardware">Hardware</option>
+        <option value="Software">Software</option>
+      </select>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label class="btn btn-ghost" id="btnPick">Pick Excel</label>
+        <button class="btn btn-primary" id="btnReload"><i class="fa fa-rotate-right"></i>&nbsp;Reload</button>
+      </div>
+      <input type="file" id="filePicker" accept=".xlsx,.xls" style="display:none" />
+    </div>
+
+    <div id="grid" aria-live="polite"></div>
+
+    <div id="empty" class="card small-muted" style="margin-top:16px;display:none">
+      <div style="font-weight:700">No problem statements found</div>
+      <div class="small-muted" style="margin-top:8px">Try a different search / category or load the Excel file manually.</div>
+    </div>
+  </div>
+
+  <!-- modal -->
+  <div id="modal" class="modal-bg" role="dialog" aria-hidden="true">
+    <div class="modal-card fade-in" role="document">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h3 id="mTitle"></h3>
+          <div class="small-muted" id="mMeta"></div>
+        </div>
+        <div><button class="btn btn-ghost" id="mClose"><i class="fa fa-times"></i> Close</button></div>
+      </div>
+
+      <div class="modal-row">
+        <div class="modal-col">
+          <div class="section-title">Description</div>
+          <div id="mDesc" class="small-muted" style="white-space:pre-wrap"></div>
+
+          <div class="section-title">Expected Solution</div>
+          <div id="mSol" class="small-muted" style="white-space:pre-wrap"></div>
+
+          <div class="section-title">Contact</div>
+          <div id="mContact" class="small-muted"></div>
+        </div>
+
+        <div class="modal-col">
+          <div class="section-title">Identifiers & Department</div>
+          <div class="small-muted" id="mDept"></div>
+
+          <div class="section-title">Links</div>
+          <div class="small-muted">
+            <div>Dataset: <a id="mDataset" class="link" href="#" target="_blank" rel="noopener"></a></div>
+            <div style="margin-top:8px">YouTube: <a id="mYoutube" class="link" href="#" target="_blank" rel="noopener"></a></div>
+          </div>
+
+          <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-primary" id="copyAll"><i class="fa fa-copy"></i>&nbsp;Copy Title + Org + Description</button>
+            <button class="btn btn-ghost" id="copyDesc"><i class="fa fa-file-lines"></i>&nbsp;Copy Description</button>
+            <a id="downloadJson" class="btn btn-ghost" href="#" download="ps-item.json"><i class="fa fa-download"></i>&nbsp;Download JSON</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- xlsx -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<script>
+/* -------------------- Helpers -------------------- */
+const safe = v => (v === null || v === undefined) ? '' : String(v);
+const el = id => document.getElementById(id);
+const grid = el('grid'), empty = el('empty'), modal = el('modal');
+const filePicker = el('filePicker'), btnPick = el('btnPick'), btnReload = el('btnReload');
+
+let DATA = []; // records array
+let currentItem = null;
+
+/* -------------------- UI Actions -------------------- */
+function populateCategoryOptions(){
+  const catSel = el('category');
+  const cats = Array.from(new Set(DATA.map(d => safe(d.Category).trim()).filter(Boolean))).sort();
+  catSel.innerHTML = '<option value="">All Categories</option>';
+  cats.forEach(c => {
+    const opt = document.createElement('option'); opt.value = c; opt.textContent = c;
+    catSel.appendChild(opt);
+  });
+}
+
+function render(){
+  grid.innerHTML = '';
+  const q = safe(el('search').value).toLowerCase().trim();
+  const cat = safe(el('category').value).toLowerCase();
+  const tech = safe(el('techType').value).toLowerCase();
+
+  const filtered = DATA.filter(d => {
+    if (cat && safe(d.Category).toLowerCase() !== cat) return false;
+    if (tech) {
+      // basic inference: if 'hardware' or 'device' keywords in title/description/category => Hardware, else Software
+      const hay = (safe(d.Title)+' '+safe(d.Description)+' '+safe(d.Category)).toLowerCase();
+      const hwKeywords = ['hardware','device','sensor','actuator','pcb','circuit','embedded','robot','iot','mechanic','mechanical','electrical'];
+      const isHW = hwKeywords.some(k=>hay.includes(k));
+      const isSW = ['software','ai','ml','machine learning','deep learning','application','app','algorithm','model','nlp','computer vision','cv','cloud'].some(k=>hay.includes(k));
+      if (tech === 'hardware' && !isHW) return false;
+      if (tech === 'software' && !isSW) return false;
     }
-    autoLoad();
-  </script>
+    if (q) {
+      const hay = (Object.values(d).join(' ')).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  if (!filtered.length) {
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+  }
+
+  filtered.forEach(d => {
+    const card = document.createElement('div'); card.className = 'card fade-in';
+    const title = document.createElement('div'); title.className = 'title'; title.textContent = safe(d.Title);
+    const org = document.createElement('div'); org.className = 'org'; org.textContent = `${safe(d.Organization)} — ${safe(d.PSNumber)}`;
+    const meta = document.createElement('div'); meta.className = 'meta';
+    const b1 = document.createElement('span'); b1.className = 'badge'; b1.textContent = safe(d.Category);
+    const b2 = document.createElement('span'); b2.className = 'badge'; b2.textContent = safe(d.Theme);
+    meta.appendChild(b1); meta.appendChild(b2);
+    const summ = document.createElement('div'); summ.className = 'summary'; summ.textContent = (safe(d.Description).slice(0,200) + (safe(d.Description).length>200 ? '...' : ''));
+
+    const actions = document.createElement('div'); actions.className = 'actions';
+    const copyTitle = document.createElement('button'); copyTitle.className = 'copy-btn'; copyTitle.innerHTML = '<i class="fa fa-copy"></i> Title';
+    copyTitle.onclick = async () => { await navigator.clipboard.writeText(safe(d.Title)); copyTitle.textContent = 'Copied ✓'; setTimeout(()=>copyTitle.innerHTML = '<i class="fa fa-copy"></i> Title',1200); };
+
+    const copyDesc = document.createElement('button'); copyDesc.className = 'copy-btn'; copyDesc.innerHTML = '<i class="fa fa-file-lines"></i> Description';
+    copyDesc.onclick = async () => { await navigator.clipboard.writeText(safe(d.Description)); copyDesc.textContent = 'Copied ✓'; setTimeout(()=>copyDesc.innerHTML = '<i class="fa fa-file-lines"></i> Description',1200); };
+
+    const openBtn = document.createElement('button'); openBtn.className = 'open-btn'; openBtn.textContent = 'Open';
+    openBtn.onclick = () => openModalWith(d);
+
+    actions.appendChild(copyTitle); actions.appendChild(copyDesc); actions.appendChild(openBtn);
+
+    card.appendChild(title); card.appendChild(org); card.appendChild(meta); card.appendChild(summ); card.appendChild(actions);
+    grid.appendChild(card);
+  });
+}
+
+/* -------------------- Modal -------------------- */
+function openModalWith(d){
+  currentItem = d;
+  el('mTitle').textContent = safe(d.Title);
+  el('mMeta').textContent = [safe(d.Organization), safe(d.PSNumber), safe(d.ProblemStatementID)].filter(Boolean).join(' • ');
+  el('mDesc').textContent = safe(d.Description);
+  el('mSol').textContent = safe(d.ExpectedSolution);
+  el('mDept').textContent = safe(d.Department) || safe(d.Organization);
+  el('mDataset').textContent = safe(d.DatasetLink); el('mDataset').href = safe(d.DatasetLink) || '#';
+  el('mYoutube').textContent = safe(d.YoutubeLink); el('mYoutube').href = safe(d.YoutubeLink) || '#';
+  el('mContact').textContent = safe(d.ContactInfo);
+  // download JSON for this item
+  const blob = new Blob([JSON.stringify(d, null, 2)], {type:'application/json'});
+  el('downloadJson').href = URL.createObjectURL(blob);
+  modal.style.display = 'flex';
+  modal.setAttribute('aria-hidden','false');
+}
+
+/* -------------------- Data load (xlsx) -------------------- */
+async function loadFromArrayBuffer(ab){
+  try{
+    const wb = XLSX.read(new Uint8Array(ab), {type:'array'});
+    const sheet = wb.SheetNames[0];
+    const raw = XLSX.utils.sheet_to_json(wb.Sheets[sheet], {defval:''});
+    // normalize: ensure department fallback
+    DATA = raw.map(r => {
+      return {
+        Title: r.Title || r.title || r['Title'] || '',
+        Organization: r.Organization || r.organization || r['Organization'] || '',
+        Category: r.Category || r.category || r['Category'] || '',
+        Theme: r.Theme || r.theme || r['Theme'] || '',
+        PSNumber: r.PSNumber || r.psnumber || r['PSNumber'] || '',
+        ProblemStatementID: r.ProblemStatementID || r['ProblemStatementID'] || r.id || '',
+        Department: r.Department || r.department || r['Department'] || '',
+        DatasetLink: r.DatasetLink || r.datasetlink || r['DatasetLink'] || '',
+        YoutubeLink: r.YoutubeLink || r.youtubelink || r['YoutubeLink'] || '',
+        ContactInfo: r.ContactInfo || r.contact || r['ContactInfo'] || '',
+        Description: (r.Description && typeof r.Description === 'string') ? r.Description : (r.DescriptionHTML ? String(r.DescriptionHTML).replace(/<[^>]*>/g,' ').trim() : ''),
+        ExpectedSolution: r.ExpectedSolution || r.expectedSolution || r['ExpectedSolution'] || ''
+      };
+    });
+    populateCategoryOptions();
+    render();
+    return true;
+  }catch(e){
+    console.error('parse failed', e);
+    return false;
+  }
+}
+
+async function autoLoadExcel(){
+  try{
+    const resp = await fetch('SIH2025_problem_statements.xlsx');
+    if(!resp.ok) throw new Error('no file');
+    const ab = await resp.arrayBuffer();
+    await loadFromArrayBuffer(ab);
+    return true;
+  }catch(e){
+    console.warn('auto load failed', e);
+    return false;
+  }
+}
+
+/* -------------------- Events -------------------- */
+el('search').addEventListener('input', () => requestAnimationFrame(render));
+el('category').addEventListener('change', render);
+el('techType').addEventListener('change', render);
+el('mClose').addEventListener('click', ()=>{ modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); });
+
+btnPick.addEventListener('click', ()=> filePicker.click());
+filePicker.addEventListener('change', async e => {
+  const f = e.target.files[0]; if(!f) return;
+  const ab = await f.arrayBuffer();
+  await loadFromArrayBuffer(ab);
+});
+btnReload.addEventListener('click', async () => {
+  await autoLoadExcel();
+});
+
+/* copy buttons in modal */
+el('copyAll').addEventListener('click', async () => {
+  if(!currentItem) return;
+  const txt = [safe(currentItem.Title), safe(currentItem.Organization), safe(currentItem.Description)].filter(Boolean).join('\n\n');
+  await navigator.clipboard.writeText(txt);
+  el('copyAll').textContent = 'Copied ✓'; setTimeout(()=>el('copyAll').innerHTML = '<i class=\"fa fa-copy\"></i>&nbsp;Copy Title + Org + Description',1200);
+});
+el('copyDesc').addEventListener('click', async () => {
+  if(!currentItem) return;
+  await navigator.clipboard.writeText(safe(currentItem.Description));
+  el('copyDesc').textContent = 'Copied ✓'; setTimeout(()=>el('copyDesc').innerHTML = '<i class=\"fa fa-file-lines\"></i>&nbsp;Copy Description',1200);
+});
+
+/* -------------------- Init -------------------- */
+(async function init(){
+  // try auto load; if fail, nothing breaks — user can pick file manually
+  await autoLoadExcel();
+})();
+</script>
 </body>
 </html>
